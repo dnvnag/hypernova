@@ -1,0 +1,63 @@
+
+package main
+
+
+import (
+	. "fmt"
+//	"net/http"
+//	"time"
+	"github.com/go-nsq"
+	"log"
+	"sync"
+	"encoding/json"
+)
+
+
+// http://tleyden.github.io/blog/2014/11/12/an-example-of-using-nsq-from-go/
+
+type Infra struct {
+	Cloud		string    `json:"cloud"`
+	Cloudtype	string    `json:"cloudtype"`
+	Zone		string	  `json:"zone"`
+}
+
+func producer() {
+  config := nsq.NewConfig()
+  w, _ := nsq.NewProducer("127.0.0.1:4150", config)
+  err := w.Publish("write_test", []byte("test"))
+  if err != nil {
+     log.Panic("Could not connect")
+  }
+  w.Stop()
+
+}
+
+func consumer() {
+	var in Infra
+	wg := &sync.WaitGroup{}
+	wg.Add(10)
+	config := nsq.NewConfig()
+	q, _ := nsq.NewConsumer("write_test", "ch", config)
+	q.AddHandler(nsq.HandlerFunc(func(message *nsq.Message) error {
+	err := json.Unmarshal(message.Body, &in)
+	if err != nil {
+		Printf("Error In JSON Decoder....\n")
+    }
+	Printf("zone value: %s: cloud value: %s: cloud type: %s \n ", in.Zone, in.Cloud, in.Cloudtype)
+	wg.Done()
+	return nil
+  }))
+  err := q.ConnectToNSQD("127.0.0.1:4150")
+  if err != nil {
+      log.Panic("Could not connect")
+  }
+  wg.Wait()
+
+
+}
+
+
+func main() {
+	//producer()
+	consumer()
+}

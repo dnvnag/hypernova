@@ -1,0 +1,1 @@
+{"topics":[{"channels":[{"name":"ch","paused":false}],"name":"infra_request","paused":false},{"channels":[{"name":"ch","paused":false}],"name":"infra_response","paused":false},{"channels":[{"name":"ch","paused":false}],"name":"write_test","paused":false}],"version":"1.0.0-compat"}
